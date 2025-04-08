@@ -5,7 +5,11 @@ import { filterPopulationData } from "../utils/filterPopulationData";
 import PopulationPieChart from "./PieCharts";
 import PopulationRadarChart from "./RadarChart";
 import StatsCard from "./StatsCard1";
-import ModeToggleBtn from "./ModeToggleBtn"; // 引入 ModeToggleCard
+import ModeToggleBtn from "./ModeToggleBtn";
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import DraggableItem from "../dnd_kit/Draggable";
+import {arrayMove, SortableContext, useSortable,verticalListSortingStrategy} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const PopulationChart = () => {
   const [isDarkMode, setDarkMode] = useState(() => {
@@ -44,9 +48,22 @@ const PopulationChart = () => {
     document.body.style.backgroundColor = isDarkMode ? "#121212" : "#f4f4f9";
   }, [isDarkMode]);
 
+    // 用于处理拖拽结束后的逻辑
+    const handleDragEnd = (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over) {
+        // 在此处可以实现拖拽结束时的逻辑，例如交换图表的位置
+        console.log(`Item ${active.id} dropped over ${over.id}`);
+      }
+    };
+
   return (
-    <div style={{ padding: "10px", color: isDarkMode?"#fff":"#333" }}>
-    <h1>Malaysia Population Data</h1>
+    <DndContext onDragEnd={handleDragEnd}>
+    <div style={{ padding: "10px", color: isDarkMode?"#fff":"#333"}}>
+
+      {/*大标题 */}
+    <h1 style={{textAlign:"center",fontSize:"3.0rem"}}>Malaysia Population Data</h1>
+
       {/* 年份选择器和模式切换放在同一行 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <div>
@@ -74,42 +91,31 @@ const PopulationChart = () => {
         <ModeToggleBtn isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
       </div>
 
+      {/*Statscard container*/}
       <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom:"10px" }}>
         <StatsCard title="Total Population ('000 million)" value={stats1[0]?.population || 0} darkMode={isDarkMode} />
       </div>
- 
-      <div style={{ 
-        background: isDarkMode ? "#333" : "#fff", 
-        borderRadius: "10px", 
-        padding: "20px", 
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-        marginBottom:"10px" }}>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "15px" }}>Age</h2>
-        <PopulationBarChart data={ageData} />
-      </div>
-
+      
+      {/*Barchart container*/}
+      <DraggableItem id="age-chart" isDarkMode={isDarkMode}>  {/* Passing isDarkMode */}
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "15px" }}>Age Group</h2>
+          <PopulationBarChart data={ageData} />
+        </DraggableItem>
+        
+        {/*Piechart & RadarChart container*/}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: "10px" }}>
-        <div style={{ 
-          background: isDarkMode ? "#333" : "#fff", 
-          borderRadius: "10px", 
-          padding: "20px", 
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-          marginBottom:"10px" }}>
-          <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "10px" }}>Gender</h2>
-          <PopulationPieChart data={genderData} />
-        </div>
-        <div style={{ 
-          background: isDarkMode ? "#333" : "#fff", 
-          borderRadius: "10px", 
-          padding: "20px", 
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-          marginBottom:"10px"
-}}>
-          <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "10px" }}>Ethnicity</h2>
-          <PopulationRadarChart data={ethnicityData} />
-        </div>
+          <DraggableItem id="gender-chart" isDarkMode={isDarkMode} >  {/* Passing isDarkMode */}
+            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Gender</h2>
+            <PopulationPieChart data={genderData} />
+          </DraggableItem>
+
+          <DraggableItem id="ethnicity-chart" isDarkMode={isDarkMode}>  {/* Passing isDarkMode */}
+            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Ethnicity</h2>
+            <PopulationRadarChart data={ethnicityData} />
+          </DraggableItem>
       </div>
     </div>
+    </DndContext>
   );
 };
 

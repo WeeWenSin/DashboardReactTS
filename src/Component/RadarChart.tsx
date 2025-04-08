@@ -6,7 +6,7 @@ interface RadarChartProps {
 
 const PopulationRadarChart = ({ data }: RadarChartProps) => {
     return (
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={420}>
         <RadarChart outerRadius="70%" data={data}>
           <PolarGrid />
           <PolarAngleAxis dataKey="ethnicity" />

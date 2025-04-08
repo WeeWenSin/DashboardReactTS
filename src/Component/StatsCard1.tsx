@@ -9,10 +9,10 @@ interface StatsCardProps {
       <div style={{
         textAlign: "center"
       }}>
-        <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color: darkMode ? "#bbb" : "#666" }}>
+        <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem", color: darkMode ? "#fff" : "#333" }}>
           {title}
         </h3>
-        <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: darkMode ? "#fff" : "#333" }}>
+        <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: darkMode ? "#fff" : "#666" }}>
           {value.toLocaleString()}
         </p>
       </div>

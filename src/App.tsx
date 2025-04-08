@@ -2,10 +2,11 @@ import PopulationChart from "./Component/PopulationChart";
 
 function App() {
   return (
-    <div>
-      <PopulationChart />
-    </div>
+      <div>
+        <PopulationChart />
+      </div>
   );
 }
 
 export default App;
+

@@ -6,7 +6,7 @@ interface BarChartProps {
 
 const PopulationBarChart = ({ data }: BarChartProps) => {
   return (
-    <ResponsiveContainer width="100%" height={250}>
+    <ResponsiveContainer width="100%" height={550}>
       <BarChart data={data}>
         <XAxis dataKey="age" />
         <YAxis />
