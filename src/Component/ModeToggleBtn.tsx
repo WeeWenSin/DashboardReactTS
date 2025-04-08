@@ -5,7 +5,7 @@ interface ModeToggleCardProps {
   onToggle: () => void;
 }
 
-const ModeToggleCard = ({ isDarkMode, onToggle }: ModeToggleCardProps) => {
+const ModeToggleBtn = ({ isDarkMode, onToggle }: ModeToggleCardProps) => {
   return (
     <button
       onClick={onToggle}
@@ -22,5 +22,5 @@ const ModeToggleCard = ({ isDarkMode, onToggle }: ModeToggleCardProps) => {
   );
 };
 
-export default ModeToggleCard;
+export default ModeToggleBtn;
 

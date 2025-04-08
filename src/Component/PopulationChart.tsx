@@ -5,7 +5,7 @@ import { filterPopulationData } from "../utils/filterPopulationData";
 import PopulationPieChart from "./PieCharts";
 import PopulationRadarChart from "./RadarChart";
 import StatsCard from "./StatsCard1";
-import ModeToggleCard from "./ModeToggleCard"; // 引入 ModeToggleCard
+import ModeToggleBtn from "./ModeToggleBtn"; // 引入 ModeToggleCard
 
 const PopulationChart = () => {
   const [isDarkMode, setDarkMode] = useState(() => {
@@ -71,7 +71,7 @@ const PopulationChart = () => {
         </div>
         
         {/* 昼夜模式按钮 */}
-        <ModeToggleCard isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
+        <ModeToggleBtn isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
       </div>
 
       <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom:"10px" }}>
