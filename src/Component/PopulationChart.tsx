@@ -6,10 +6,27 @@ import PopulationPieChart from "./PieCharts";
 import PopulationRadarChart from "./RadarChart";
 import StatsCard from "./StatsCard1";
 import ModeToggleBtn from "./ModeToggleBtn";
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext,closestCenter ,DragEndEvent } from '@dnd-kit/core';
 import DraggableItem from "../dnd_kit/Draggable";
 import {arrayMove, SortableContext, useSortable,verticalListSortingStrategy} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+// Sortable wrapper component
+const SortableChartItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    marginBottom: "1rem",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+};
 
 const PopulationChart = () => {
   const [isDarkMode, setDarkMode] = useState(() => {
@@ -19,6 +36,9 @@ const PopulationChart = () => {
 
   const [apiData, setApiData] = useState<any[]>([]);
   const [year, setYear] = useState("2024-01-01");
+
+  // 图表显示顺序
+  const [chartOrder, setChartOrder] = useState(["age-chart", "gender-chart", "ethnicity-chart"]);
 
   useEffect(() => {
     const getData = async () => {
@@ -39,7 +59,7 @@ const PopulationChart = () => {
   const toggleDarkMode = () => {
     setDarkMode(prevMode => {
       const newMode = !prevMode;
-      localStorage.setItem("darkMode", JSON.stringify(newMode)); // 保存模式选择
+      localStorage.setItem("darkMode", JSON.stringify(newMode));
       return newMode;
     });
   };
@@ -48,73 +68,89 @@ const PopulationChart = () => {
     document.body.style.backgroundColor = isDarkMode ? "#121212" : "#f4f4f9";
   }, [isDarkMode]);
 
-    // 用于处理拖拽结束后的逻辑
-    const handleDragEnd = (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (over) {
-        // 在此处可以实现拖拽结束时的逻辑，例如交换图表的位置
-        console.log(`Item ${active.id} dropped over ${over.id}`);
-      }
-    };
+  // handleDragEnd：拖拽结束时被触发，判断新旧位置是否不同，若不同则更新图表显示顺序
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = chartOrder.indexOf(active.id as string);
+      const newIndex = chartOrder.indexOf(over.id as string);
+      setChartOrder((items) => arrayMove(items, oldIndex, newIndex));
+    }
+  };
+
+  // 所有图表内容
+  const chartComponents: Record<string, JSX.Element> = {
+    "age-chart": (
+      <>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "15px" }}>Age Group</h2>
+        <PopulationBarChart data={ageData} />
+      </>
+    ),
+    "gender-chart": (
+      <>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Gender</h2>
+        <PopulationPieChart data={genderData} />
+      </>
+    ),
+    "ethnicity-chart": (
+      <>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Ethnicity</h2>
+        <PopulationRadarChart data={ethnicityData} />
+      </>
+    ),
+  };
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-    <div style={{ padding: "10px", color: isDarkMode?"#fff":"#333"}}>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div style={{ padding: "10px", color: isDarkMode ? "#fff" : "#333" }}>
+        <h1 style={{ textAlign: "center", fontSize: "3.0rem" }}>Malaysia Population Data</h1>
 
-      {/*大标题 */}
-    <h1 style={{textAlign:"center",fontSize:"3.0rem"}}>Malaysia Population Data</h1>
-
-      {/* 年份选择器和模式切换放在同一行 */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <div>
-          <label htmlFor="year" style={{ fontSize: "1.5rem" }}>Select Year: </label>
-          <select
-            id="year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            style={{ fontSize: "1.2rem", padding: "0.4rem", minWidth: "150px" }}
-          >
-            {Array.from(new Set(apiData.map(item => item.date)))
-              .sort()
-              .map((date) => {
-                const yearLabel = new Date(date).getFullYear();
-                return (
-                  <option key={date} value={date}>
-                    {yearLabel}
-                  </option>
-                );
-              })}
-          </select>
+        {/* 年份选择 + 昼夜模式 */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <div>
+            <label htmlFor="year" style={{ fontSize: "1.5rem" }}>Select Year: </label>
+            <select
+              id="year"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              style={{ fontSize: "1.2rem", padding: "0.4rem", minWidth: "150px" }}
+            >
+              {Array.from(new Set(apiData.map(item => item.date)))
+                .sort()
+                .map((date) => {
+                  const yearLabel = new Date(date).getFullYear();
+                  return (
+                    <option key={date} value={date}>
+                      {yearLabel}
+                    </option>
+                  );
+                })}
+            </select>
+          </div>
+          <ModeToggleBtn isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
         </div>
-        
-        {/* 昼夜模式按钮 */}
-        <ModeToggleBtn isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
-      </div>
 
-      {/*Statscard container*/}
-      <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom:"10px" }}>
-        <StatsCard title="Total Population ('000 million)" value={stats1[0]?.population || 0} darkMode={isDarkMode} />
-      </div>
-      
-      {/*Barchart container*/}
-      <DraggableItem id="age-chart" isDarkMode={isDarkMode}>  {/* Passing isDarkMode */}
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "15px" }}>Age Group</h2>
-          <PopulationBarChart data={ageData} />
-        </DraggableItem>
-        
-        {/*Piechart & RadarChart container*/}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: "10px" }}>
-          <DraggableItem id="gender-chart" isDarkMode={isDarkMode} >  {/* Passing isDarkMode */}
-            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Gender</h2>
-            <PopulationPieChart data={genderData} />
-          </DraggableItem>
+        {/* 人口总数 */}
+        <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom: "20px" }}>
+          <StatsCard title="Total Population ('000 million)" value={stats1[0]?.population || 0} darkMode={isDarkMode} />
+        </div>
 
-          <DraggableItem id="ethnicity-chart" isDarkMode={isDarkMode}>  {/* Passing isDarkMode */}
-            <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "10px" }}>Ethnicity</h2>
-            <PopulationRadarChart data={ethnicityData} />
-          </DraggableItem>
+        {/* 图表区 */}
+        <SortableContext items={chartOrder} strategy={verticalListSortingStrategy}>
+          {chartOrder.map((id) => (
+            <SortableChartItem key={id} id={id}>
+              <div style={{
+                background: isDarkMode ? "#222" : "#fff",
+                borderRadius: "10px",
+                padding: "20px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+              }}>
+                {chartComponents[id]}
+              </div>
+            </SortableChartItem>
+          ))}
+        </SortableContext>
       </div>
-    </div>
     </DndContext>
   );
 };
