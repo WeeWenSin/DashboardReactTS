@@ -6,27 +6,11 @@ import PopulationPieChart from "./PieCharts";
 import PopulationRadarChart from "./RadarChart";
 import StatsCard from "./StatsCard1";
 import ModeToggleBtn from "./ModeToggleBtn";
-import { DndContext,closestCenter ,DragEndEvent } from '@dnd-kit/core';
-import DraggableItem from "../dnd_kit/Draggable";
-import {arrayMove, SortableContext, useSortable,verticalListSortingStrategy} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { Responsive, WidthProvider } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css"; 
 
-// Sortable wrapper component
-const SortableChartItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    marginBottom: "1rem",
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </div>
-  );
-};
+const ResponsiveGridLayout = WidthProvider(Responsive); // 创建一个响应式布局
 
 const PopulationChart = () => {
   const [isDarkMode, setDarkMode] = useState(() => {
@@ -36,9 +20,6 @@ const PopulationChart = () => {
 
   const [apiData, setApiData] = useState<any[]>([]);
   const [year, setYear] = useState("2024-01-01");
-
-  // 图表显示顺序
-  const [chartOrder, setChartOrder] = useState(["age-chart", "gender-chart", "ethnicity-chart"]);
 
   useEffect(() => {
     const getData = async () => {
@@ -68,16 +49,6 @@ const PopulationChart = () => {
     document.body.style.backgroundColor = isDarkMode ? "#121212" : "#f4f4f9";
   }, [isDarkMode]);
 
-  // handleDragEnd：拖拽结束时被触发，判断新旧位置是否不同，若不同则更新图表显示顺序
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = chartOrder.indexOf(active.id as string);
-      const newIndex = chartOrder.indexOf(over.id as string);
-      setChartOrder((items) => arrayMove(items, oldIndex, newIndex));
-    }
-  };
-
   // 所有图表内容
   const chartComponents: Record<string, JSX.Element> = {
     "age-chart": (
@@ -101,7 +72,6 @@ const PopulationChart = () => {
   };
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div style={{ padding: "10px", color: isDarkMode ? "#fff" : "#333" }}>
         <h1 style={{ textAlign: "center", fontSize: "3.0rem" }}>Malaysia Population Data</h1>
 
@@ -131,27 +101,42 @@ const PopulationChart = () => {
         </div>
 
         {/* 人口总数 */}
-        <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom: "20px" }}>
+        <div style={{ background: isDarkMode ? "#333" : "#fff", borderRadius: "10px", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", marginBottom: "10px" }}>
           <StatsCard title="Total Population ('000 million)" value={stats1[0]?.population || 0} darkMode={isDarkMode} />
         </div>
 
         {/* 图表区 */}
-        <SortableContext items={chartOrder} strategy={verticalListSortingStrategy}>
-          {chartOrder.map((id) => (
-            <SortableChartItem key={id} id={id}>
-              <div style={{
-                background: isDarkMode ? "#222" : "#fff",
-                borderRadius: "10px",
-                padding: "20px",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-              }}>
-                {chartComponents[id]}
-              </div>
-            </SortableChartItem>
-          ))}
-        </SortableContext>
+        <ResponsiveGridLayout
+        className="layout"
+        layouts={{ 
+          lg: [
+            { i: "age-chart", x: 0, y: 0, w: 12, h: 4 }, 
+            { i: "gender-chart", x: 0, y: 0, w: 6, h: 4 }, 
+            { i: "ethnicity-chart", x: 0, y: 0, w: 6, h: 4 }
+          ] 
+          }}
+        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
+        cols={{ lg: 12, md: 10, sm: 6, xs: 4 }}
+        margin={[20, 20]}
+        containerPadding={[0, 10]}
+        rowHeight={115}
+        resizeHandles={['se', 'sw', 'ne', 'nw']} // 你可以限制或者添加需要的调整大小手柄
+      >
+        {Object.keys(chartComponents).map(id => (
+          <div key={id}>
+            <div style={{
+              background: isDarkMode ? "#333" : "#fff",
+              border: isDarkMode ? "#666" : "none",
+              borderRadius: "10px",
+              padding: "20px",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
+            }}>
+              {chartComponents[id]}
+            </div>
+          </div>
+        ))}
+      </ResponsiveGridLayout>
       </div>
-    </DndContext>
   );
 };
 

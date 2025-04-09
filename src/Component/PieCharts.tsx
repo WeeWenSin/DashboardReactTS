@@ -4,11 +4,11 @@ interface PieChartProps {
     data: { sex: string; population: number }[];
 }
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1", "#a4de6c"];
+const COLORS = ["rgb(186, 253, 136)","rgb(193, 160, 255)"];
 
     const PopulationPieChart = ({ data }: PieChartProps) => {
       return (
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={420}>
            <PieChart data={data}>
                 <Pie 
                     data={data}
