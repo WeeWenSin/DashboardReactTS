@@ -1,10 +1,12 @@
-import PopulationChart from "./Component/PopulationChart";
+import PopulationChart from "./ChartUseGL";
 
 function App() {
   return (
+    <>
       <div>
         <PopulationChart />
       </div>
+      </>
   );
 }
 

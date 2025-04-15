@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { fetchPopulationData } from "../Api/api";
-import PopulationBarChart from "./BarChart";
-import { filterPopulationData } from "../utils/filterPopulationData";
-import PopulationPieChart from "./PieCharts";
-import PopulationRadarChart from "./RadarChart";
-import StatsCard from "./StatsCard1";
-import ModeToggleBtn from "./ModeToggleBtn";
+import { fetchPopulationData } from "./Api/api";
+import PopulationBarChart from "./Component/BarChart";
+import { filterPopulationData } from "./Component/filterPopulationData";
+import PopulationPieChart from "./Component/PieCharts";
+import PopulationRadarChart from "./Component/RadarChart";
+import StatsCard from "./Component/StatsCard1";
+import ModeToggleBtn from "./Component/ModeToggleBtn";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css"; 
@@ -73,6 +73,7 @@ const PopulationChart = () => {
 
   return (
       <div style={{ padding: "10px", color: isDarkMode ? "#fff" : "#333" }}>
+        <h1 style={{ textAlign: "center", fontSize: "4.0rem" }}>This is example for using React Grid Layout</h1>
         <h1 style={{ textAlign: "center", fontSize: "3.0rem" }}>Malaysia Population Data</h1>
 
         {/* 年份选择 + 昼夜模式 */}
@@ -120,7 +121,7 @@ const PopulationChart = () => {
         margin={[20, 20]}
         containerPadding={[0, 10]}
         rowHeight={115}
-        resizeHandles={['se', 'sw', 'ne', 'nw']} // 你可以限制或者添加需要的调整大小手柄
+        resizeHandles={['s', 'se', 'sw', 'n' , 'ne', 'nw','e','w']} // 你可以限制或者添加需要的调整大小手柄
       >
         {Object.keys(chartComponents).map(id => (
           <div key={id}>
